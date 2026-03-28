@@ -28,12 +28,6 @@ const StopIcon = () => (
   </svg>
 );
 
-const KeyIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-  </svg>
-);
-
 const CheckIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
@@ -47,22 +41,15 @@ const CopyIcon = () => (
   </svg>
 );
 
-const SettingsIcon = () => (
+const SparkleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
   </svg>
 );
 
 const ChevronIcon = ({ open }) => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: 'transform 0.25s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}>
     <polyline points="6 9 12 15 18 9" />
-  </svg>
-);
-
-const SparkleIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
   </svg>
 );
 
@@ -81,18 +68,9 @@ export default function PromptForge() {
   const [listening, setListening] = useState(false);
   const [interim, setInterim] = useState('');
   const [voiceSupported, setVoiceSupported] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [keySaved, setKeySaved] = useState(false);
   const recognitionRef = useRef(null);
   const finalRef = useRef('');
   const bottomRef = useRef(null);
-
-  // Load API key from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('pf_api_key');
-    if (saved) { setApiKey(saved); setKeySaved(true); }
-  }, []);
 
   // Speech recognition setup
   useEffect(() => {
@@ -126,30 +104,17 @@ export default function PromptForge() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [stage, questions, result]);
 
-  function saveApiKey() {
-    if (!apiKey.trim()) return;
-    localStorage.setItem('pf_api_key', apiKey.trim());
-    setKeySaved(true);
-    setTimeout(() => setShowSettings(false), 600);
-  }
-
-  function clearApiKey() {
-    localStorage.removeItem('pf_api_key');
-    setApiKey('');
-    setKeySaved(false);
-  }
-
   async function callClaude(messages) {
     const res = await fetch('/api/claude', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages, system: SP, apiKey: apiKey.trim() || undefined }),
+      body: JSON.stringify({ messages, system: SP }),
     });
 
     const data = await res.json();
 
     if (!res.ok) {
-      throw new Error(data.error || 'API request failed');
+      throw new Error(data.error || 'Something went wrong. Please try again.');
     }
 
     const text = data.content.map((b) => b.text || '').join('').trim();
@@ -158,7 +123,6 @@ export default function PromptForge() {
 
   async function submitReqs() {
     if (!requirements.trim()) return;
-    if (!apiKey.trim()) { setError('Please add your API key first — click the ⚙ icon above.'); return; }
     if (listening) recognitionRef.current?.stop();
     setLoading(true); setError(null);
     try {
@@ -166,7 +130,7 @@ export default function PromptForge() {
       setQuestions(json.questions || []);
       setAnswers(Object.fromEntries((json.questions || []).map((_, i) => [i, ''])));
       setStage(STAGES.CLARIFYING);
-    } catch (err) { setError(err.message || 'Something went wrong. Try again.'); }
+    } catch (err) { setError(err.message); }
     setLoading(false);
   }
 
@@ -181,7 +145,7 @@ export default function PromptForge() {
         { role: 'user', content: 'Answers:\n\n' + at + '\n\nNow generate the prompts.' },
       ]);
       setResult(json); setStage(STAGES.DONE); setExpandedStep(0);
-    } catch (err) { setError(err.message || 'Something went wrong. Try again.'); setStage(STAGES.CLARIFYING); }
+    } catch (err) { setError(err.message); setStage(STAGES.CLARIFYING); }
     setLoading(false);
   }
 
@@ -191,7 +155,7 @@ export default function PromptForge() {
 
   function copyAll() {
     if (!result?.prompts) return;
-    const full = result.prompts.map((p, i) => `── Step ${p.step}: ${p.title} ──\nGoal: ${p.goal}\n\n${p.prompt}`).join('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    const full = result.prompts.map((p) => `── Step ${p.step}: ${p.title} ──\nGoal: ${p.goal}\n\n${p.prompt}`).join('\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
     navigator.clipboard.writeText(full).then(() => { setCopied('all'); setTimeout(() => setCopied(null), 2000); });
   }
 
@@ -215,42 +179,7 @@ export default function PromptForge() {
             <div className="logo-icon"><SparkleIcon /></div>
             <span className="logo-text">PromptForge</span>
           </div>
-          <button className={'nav-btn' + (showSettings ? ' active' : '')} onClick={() => setShowSettings(!showSettings)} id="settings-btn">
-            <SettingsIcon />
-          </button>
         </nav>
-
-        {/* ── Settings Panel ── */}
-        {showSettings && (
-          <div className="settings-overlay" onClick={() => setShowSettings(false)}>
-            <div className="settings-panel" onClick={(e) => e.stopPropagation()}>
-              <div className="settings-header">
-                <KeyIcon />
-                <span>API Configuration</span>
-              </div>
-              <p className="settings-desc">Enter your Anthropic API key. It's stored locally in your browser and sent securely to the server proxy — never exposed in client-side code.</p>
-              <div className="key-input-wrap">
-                <input
-                  id="api-key-input"
-                  type="password"
-                  className="key-input"
-                  placeholder="sk-ant-api03-..."
-                  value={apiKey}
-                  onChange={(e) => { setApiKey(e.target.value); setKeySaved(false); }}
-                  onKeyDown={(e) => e.key === 'Enter' && saveApiKey()}
-                />
-                {keySaved && <span className="key-saved"><CheckIcon /> Saved</span>}
-              </div>
-              <div className="settings-actions">
-                <button className="btn-primary" onClick={saveApiKey} disabled={!apiKey.trim()}>Save Key</button>
-                {keySaved && <button className="btn-ghost" onClick={clearApiKey}>Remove Key</button>}
-              </div>
-              <a className="settings-link" href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer">
-                Get an API key from Anthropic →
-              </a>
-            </div>
-          </div>
-        )}
 
         {/* ── Main Content ── */}
         <main className="main">
@@ -275,7 +204,7 @@ export default function PromptForge() {
                   placeholder="e.g. Build me a SaaS dashboard with user auth, Stripe billing, and a dark mode..."
                   value={requirements}
                   onChange={(e) => setRequirements(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) submitReqs(); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submitReqs(); }}
                 />
                 {voiceSupported && (
                   <button className={'mic-btn ' + (listening ? 'active' : '')} onClick={toggleVoice} id="mic-btn">
@@ -289,13 +218,8 @@ export default function PromptForge() {
                 <button className="btn-primary" onClick={submitReqs} disabled={loading || !requirements.trim()} id="analyze-btn">
                   {loading ? <><span className="spinner" />Analyzing...</> : 'Analyze Requirements'}
                 </button>
-                {!keySaved && (
-                  <button className="btn-ghost key-hint" onClick={() => setShowSettings(true)}>
-                    <KeyIcon /> Add API Key
-                  </button>
-                )}
               </div>
-              <div className="shortcut-hint">⌘ + Enter to submit</div>
+              <div className="shortcut-hint">Ctrl + Enter to submit</div>
             </div>
           )}
 
@@ -473,65 +397,9 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   padding: 18px 24px; max-width: 780px; width: 100%; margin: 0 auto;
 }
-
 .nav-brand { display: flex; align-items: center; gap: 10px; }
 .logo-icon { color: var(--accent); display: flex; }
 .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; }
-
-.nav-btn {
-  width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text-3); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s ease;
-}
-.nav-btn:hover { border-color: var(--border-h); color: var(--text-2); background: var(--card); }
-.nav-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(108,92,231,0.08); }
-
-/* ── Settings ── */
-.settings-overlay {
-  position: fixed; inset: 0; z-index: 100; display: flex; align-items: flex-start; justify-content: center;
-  padding-top: 80px; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);
-  animation: fadeIn 0.2s ease;
-}
-
-.settings-panel {
-  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-  padding: 28px; width: 100%; max-width: 440px; margin: 0 16px;
-  animation: slideUp 0.25s ease;
-}
-
-.settings-header {
-  display: flex; align-items: center; gap: 10px;
-  font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 10px;
-}
-
-.settings-desc { font-size: 12.5px; color: var(--text-3); line-height: 1.6; margin-bottom: 18px; }
-
-.key-input-wrap { position: relative; margin-bottom: 14px; }
-
-.key-input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text); font-family: 'Inter', monospace;
-  font-size: 13px; padding: 12px 14px; outline: none;
-  transition: border-color 0.2s;
-}
-.key-input:focus { border-color: var(--accent); }
-.key-input::placeholder { color: var(--text-3); }
-
-.key-saved {
-  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-  display: flex; align-items: center; gap: 4px;
-  font-size: 11px; color: var(--success); font-weight: 500;
-  animation: fadeIn 0.3s ease;
-}
-
-.settings-actions { display: flex; gap: 10px; margin-bottom: 16px; }
-
-.settings-link {
-  font-size: 12px; color: var(--accent); text-decoration: none;
-  opacity: 0.8; transition: opacity 0.2s;
-}
-.settings-link:hover { opacity: 1; text-decoration: underline; }
 
 /* ── Main ── */
 .main {
@@ -555,11 +423,9 @@ body {
   font-size: clamp(28px, 6vw, 48px); line-height: 1.08;
   letter-spacing: -0.03em; color: var(--text);
 }
-
 .hero-accent {
   background: var(--accent-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-
 .hero-sub { font-size: 14px; color: var(--text-3); margin-top: 14px; line-height: 1.6; max-width: 500px; }
 
 /* ── Cards ── */
@@ -571,14 +437,11 @@ body {
 .card:hover { border-color: var(--border-h); }
 .card-muted { opacity: 0.6; }
 .card-muted:hover { opacity: 0.8; }
-
 .card-label {
   font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--accent); font-weight: 600; margin-bottom: 14px;
 }
-
 .card-desc { font-size: 13px; color: var(--text-3); margin-bottom: 22px; line-height: 1.5; }
-
 .card-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
 /* ── Textarea ── */
@@ -594,12 +457,8 @@ textarea, .answer-input {
 textarea:focus, .answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.1); }
 textarea.listening { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(248,113,113,0.12); }
 textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
-
 .answer-input { min-height: unset; padding: 11px 16px; font-size: 13px; }
-
-.shortcut-hint {
-  font-size: 11px; color: var(--text-3); margin-top: 8px; opacity: 0.5;
-}
+.shortcut-hint { font-size: 11px; color: var(--text-3); margin-top: 8px; opacity: 0.5; }
 
 /* ── Mic Button ── */
 .mic-btn {
@@ -632,7 +491,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   animation: pulse-dot 1s infinite;
 }
 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
-
 .interim-text { font-size: 12px; color: rgba(248,113,113,0.5); font-style: italic; margin-bottom: 10px; min-height: 16px; }
 
 /* ── Buttons ── */
@@ -654,9 +512,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
 }
 .btn-ghost:hover { border-color: var(--accent); color: var(--text-2); }
-
-.key-hint { color: var(--accent); border-color: rgba(108,92,231,0.25); }
-.key-hint:hover { background: rgba(108,92,231,0.06); }
 
 /* ── Error ── */
 .error-msg {
@@ -705,7 +560,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 14px; gap: 12px; flex-wrap: wrap;
 }
-
 .copy-all-btn {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
@@ -721,14 +575,12 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   margin-bottom: 10px; overflow: hidden; transition: border-color 0.25s;
 }
 .step-row.expanded { border-color: rgba(108,92,231,0.25); }
-
 .step-header {
   display: flex; align-items: center; gap: 14px; padding: 16px 20px;
   cursor: pointer; user-select: none; background: var(--surface);
   transition: background 0.2s;
 }
 .step-header:hover { background: var(--card); }
-
 .step-num {
   width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
   border: 1px solid var(--border-h);
@@ -737,25 +589,20 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   transition: all 0.25s;
 }
 .step-num.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
 .step-info { flex: 1; min-width: 0; }
 .step-title { font-size: 13.5px; font-weight: 500; color: var(--text); }
 .step-goal-preview { font-size: 11.5px; color: var(--text-3); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
 .step-body { padding: 0 20px 20px; background: var(--bg); }
 .step-goal { font-size: 12.5px; color: var(--text-3); margin-bottom: 14px; padding-top: 16px; line-height: 1.6; }
-
 .step-toolbar {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 4px; flex-wrap: wrap; gap: 8px;
 }
-
 .step-tag {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
   color: var(--text-3); background: var(--surface); border: 1px solid var(--border);
   padding: 3px 10px; border-radius: 6px; font-weight: 500;
 }
-
 .copy-btn {
   display: inline-flex; align-items: center; gap: 5px;
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
@@ -764,7 +611,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
 }
 .copy-btn:hover { border-color: var(--accent); color: var(--text-2); }
 .copy-btn.copied { border-color: rgba(52,211,153,0.3); color: var(--success); }
-
 .prompt-block {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; padding: 16px; margin-top: 10px;
@@ -773,7 +619,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   white-space: pre-wrap; word-break: break-word;
   max-height: 400px; overflow-y: auto;
 }
-
 .prompt-block::-webkit-scrollbar { width: 6px; }
 .prompt-block::-webkit-scrollbar-track { background: transparent; }
 .prompt-block::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -802,7 +647,6 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
 /* ── Animations ── */
 .fade-in { animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Responsive ── */
 @media (max-width: 600px) {
@@ -813,6 +657,5 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   .step-header { padding: 14px 16px; }
   .step-body { padding: 0 16px 16px; }
   .prompt-block { padding: 14px; font-size: 12px; }
-  .settings-panel { padding: 22px; }
 }
 `;
