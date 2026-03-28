@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
       {
         name: 'api-proxy',
         configureServer(server) {
-          server.middlewares.use('/api/claude', async (req, res) => {
+          server.middlewares.use('/api/groq', async (req, res) => {
             if (req.method === 'OPTIONS') {
               res.writeHead(200, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST', 'Access-Control-Allow-Headers': 'Content-Type' });
               return res.end();
@@ -27,25 +27,29 @@ export default defineConfig(({ mode }) => {
             req.on('end', async () => {
               try {
                 const { messages, system } = JSON.parse(body);
-                const apiKey = env.ANTHROPIC_API_KEY;
+                const apiKey = env.GROQ_API_KEY;
 
                 if (!apiKey) {
                   res.writeHead(401, { 'Content-Type': 'application/json' });
-                  return res.end(JSON.stringify({ error: 'ANTHROPIC_API_KEY not set. Create a .env file with your key.' }));
+                  return res.end(JSON.stringify({ error: 'GROQ_API_KEY not set. Check your .env file.' }));
                 }
 
-                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                const groqMessages = [
+                  { role: 'system', content: system },
+                  ...messages
+                ];
+
+                const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
                   method: 'POST',
                   headers: {
                     'Content-Type': 'application/json',
-                    'x-api-key': apiKey,
-                    'anthropic-version': '2023-06-01',
+                    'Authorization': `Bearer ${apiKey}`,
                   },
                   body: JSON.stringify({
-                    model: 'claude-sonnet-4-20250514',
-                    max_tokens: 4096,
-                    system,
-                    messages,
+                    model: 'llama-3.3-70b-versatile',
+                    messages: groqMessages,
+                    temperature: 0.5,
+                    response_format: { type: "json_object" }
                   }),
                 });
 

@@ -104,8 +104,8 @@ export default function PromptForge() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [stage, questions, result]);
 
-  async function callClaude(messages) {
-    const res = await fetch('/api/claude', {
+  async function callAI(messages) {
+    const res = await fetch('/api/groq', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ messages, system: SP }),
@@ -117,7 +117,7 @@ export default function PromptForge() {
       throw new Error(data.error || 'Something went wrong. Please try again.');
     }
 
-    const text = data.content.map((b) => b.text || '').join('').trim();
+    const text = data.choices[0].message.content.trim();
     return JSON.parse(text);
   }
 
@@ -126,7 +126,7 @@ export default function PromptForge() {
     if (listening) recognitionRef.current?.stop();
     setLoading(true); setError(null);
     try {
-      const json = await callClaude([{ role: 'user', content: 'Requirements:\n\n' + requirements }]);
+      const json = await callAI([{ role: 'user', content: 'Requirements:\n\n' + requirements }]);
       setQuestions(json.questions || []);
       setAnswers(Object.fromEntries((json.questions || []).map((_, i) => [i, ''])));
       setStage(STAGES.CLARIFYING);
@@ -139,7 +139,7 @@ export default function PromptForge() {
     setLoading(true); setError(null); setStage(STAGES.GENERATING);
     try {
       const at = questions.map((q, i) => 'Q: ' + q + '\nA: ' + answers[i]).join('\n\n');
-      const json = await callClaude([
+      const json = await callAI([
         { role: 'user', content: 'Requirements:\n\n' + requirements },
         { role: 'assistant', content: JSON.stringify({ phase: 'clarify', questions }) },
         { role: 'user', content: 'Answers:\n\n' + at + '\n\nNow generate the prompts.' },
