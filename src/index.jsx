@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { EtheralShadow } from './components/EtheralShadow';
+import { LiquidButton } from './components/LiquidButton';
+import { MagneticDock } from './components/MagneticDock';
 
 const STAGES = { INPUT: 'input', CLARIFYING: 'clarifying', GENERATING: 'generating', DONE: 'done' };
 
@@ -170,8 +173,8 @@ export default function PromptForge() {
       <style>{styles}</style>
       <div className="app">
         {/* ── Ambient background ── */}
-        <div className="ambient" />
-        <div className="grain" />
+        <EtheralShadow />
+        <MagneticDock />
 
         {/* ── Navigation ── */}
         <nav className="nav">
@@ -198,6 +201,11 @@ export default function PromptForge() {
               <div className="card-label">Your Requirements</div>
               {listening && <div className="listening-badge"><span className="pulse-dot" /> Listening — speak now</div>}
               <div className="textarea-wrap">
+                <div className="glow-border">
+                  <div className="glow-layer glow-1" />
+                  <div className="glow-layer glow-2" />
+                  <div className="glow-layer glow-3" />
+                </div>
                 <textarea
                   id="requirements-input"
                   className={listening ? 'listening' : ''}
@@ -215,9 +223,9 @@ export default function PromptForge() {
               {interim && <div className="interim-text">{interim}</div>}
               {error && <div className="error-msg">{error}</div>}
               <div className="card-actions">
-                <button className="btn-primary" onClick={submitReqs} disabled={loading || !requirements.trim()} id="analyze-btn">
+                <LiquidButton onClick={submitReqs} disabled={loading || !requirements.trim()} id="analyze-btn">
                   {loading ? <><span className="spinner" />Analyzing...</> : 'Analyze Requirements'}
-                </button>
+                </LiquidButton>
               </div>
               <div className="shortcut-hint">Ctrl + Enter to submit</div>
             </div>
@@ -250,9 +258,9 @@ export default function PromptForge() {
                 ))}
                 {error && <div className="error-msg">{error}</div>}
                 <div className="card-actions">
-                  <button className="btn-primary" onClick={submitAnswers} disabled={loading || questions.some((_, i) => !answers[i]?.trim())} id="generate-btn">
+                  <LiquidButton onClick={submitAnswers} disabled={loading || questions.some((_, i) => !answers[i]?.trim())} id="generate-btn">
                     {loading ? <><span className="spinner" />Generating...</> : 'Generate Prompts'}
-                  </button>
+                  </LiquidButton>
                   <button className="btn-ghost" onClick={reset}>Start Over</button>
                 </div>
               </div>
@@ -327,9 +335,9 @@ export default function PromptForge() {
         <footer className="footer">
           <span>Built with</span>
           <span className="footer-heart">♥</span>
-          <span>by PromptForge</span>
+          <span>by PromptForge | Faizan</span>
           <span className="footer-sep">·</span>
-          <span>Powered by Claude</span>
+          <span>Powered by Groq</span>
         </footer>
       </div>
     </>
@@ -428,13 +436,54 @@ body {
 }
 .hero-sub { font-size: 14px; color: var(--text-3); margin-top: 14px; line-height: 1.6; max-width: 500px; }
 
-/* ── Cards ── */
-.card {
-  background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 28px; width: 100%; margin-bottom: 16px;
-  transition: border-color 0.3s ease;
+/* ── Cards (Animated Gradient Border) ── */
+@property --card-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
-.card:hover { border-color: var(--border-h); }
+
+.card {
+  position: relative;
+  background-color: var(--card); /* Fallback */
+  background-image: 
+    linear-gradient(var(--card), var(--card)),
+    conic-gradient(
+      from var(--card-angle),
+      transparent 10%,
+      rgba(108, 92, 231, 0.4) 30%,
+      #a855f7 50%,
+      rgba(108, 92, 231, 0.4) 70%,
+      transparent 90%
+    );
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 28px; width: 100%; margin-bottom: 16px;
+  animation: card-rotate 6s linear infinite;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2)
+}
+
+.card:hover { 
+  animation-duration: 3s; 
+  background-image: 
+    linear-gradient(var(--card), var(--card)),
+    conic-gradient(
+      from var(--card-angle),
+      transparent 5%,
+      rgba(108, 92, 231, 0.7) 30%,
+      #a855f7 50%,
+      #cf30aa 60%,
+      rgba(108, 92, 231, 0.7) 70%,
+      transparent 95%
+    );
+}
+
+@keyframes card-rotate {
+  from { --card-angle: 0deg; }
+  to { --card-angle: 360deg; }
+}
 .card-muted { opacity: 0.6; }
 .card-muted:hover { opacity: 0.8; }
 .card-label {
@@ -444,16 +493,65 @@ body {
 .card-desc { font-size: 13px; color: var(--text-3); margin-bottom: 22px; line-height: 1.5; }
 .card-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
-/* ── Textarea ── */
-.textarea-wrap { position: relative; margin-bottom: 10px; }
+/* ── Textarea Glowing Border ── */
+.textarea-wrap { position: relative; margin-bottom: 20px; z-index: 1; border-radius: 12px; }
+
+.glow-border {
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: 12px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glow-layer {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200%; height: 600px;
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+  transition: all 2s ease;
+}
+
+/* Layer 1: The sharp, fast spin */
+.glow-1 {
+  background: conic-gradient(from 0deg, transparent 10%, #402fb5 30%, #cf30aa 60%, transparent 80%);
+  animation: glow-spin 4s linear infinite;
+}
+
+/* Layer 2: Deep blue ambient spin */
+.glow-2 {
+  background: conic-gradient(from 180deg, transparent 10%, #18116a 40%, transparent 60%);
+  animation: glow-spin 6s linear infinite reverse;
+  filter: blur(4px);
+}
+
+/* Layer 3: Vibrant pink highlight */
+.glow-3 {
+  background: conic-gradient(from 90deg, transparent 0%, #dfa2da 20%, transparent 40%);
+  animation: glow-spin 5s linear infinite;
+  filter: blur(2px) brightness(1.5);
+  mix-blend-mode: screen;
+}
+
+.textarea-wrap:hover .glow-1 { animation-duration: 2s; }
+.textarea-wrap:focus-within .glow-1 { animation-duration: 1.5s; background: conic-gradient(from 0deg, transparent 5%, #a099d8 20%, #dfa2da 50%, #6e1b60 70%, transparent 85%); }
+
+@keyframes glow-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
 textarea, .answer-input {
-  width: 100%; background: var(--bg); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text); font-family: 'Inter', sans-serif;
+  width: 100%; background: var(--surface); border: 1px solid transparent;
+  border-radius: 11px; color: var(--text); font-family: 'Inter', sans-serif;
   font-size: 13.5px; padding: 14px 50px 14px 16px; resize: vertical;
-  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none; transition: background 0.3s;
   min-height: 140px; line-height: 1.65;
+  position: relative; z-index: 2;
 }
+textarea:focus, .answer-input:focus { background: var(--bg); }
 textarea:focus, .answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(108,92,231,0.1); }
 textarea.listening { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(248,113,113,0.12); }
 textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
@@ -493,17 +591,27 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
 @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 .interim-text { font-size: 12px; color: rgba(248,113,113,0.5); font-style: italic; margin-bottom: 10px; min-height: 16px; }
 
-/* ── Buttons ── */
-.btn-primary {
-  background: var(--accent-g); color: #fff; border: none;
-  border-radius: 10px; padding: 12px 28px;
-  font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
-  box-shadow: 0 2px 12px rgba(108,92,231,0.25);
+/* ── Liquid Glass Button ── */
+.liquid-button {
+  position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif; font-size: 13.5px; font-weight: 600;
+  color: #fff; border: none; background: transparent; outline: none; padding: 12px 28px; border-radius: 12px;
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(108,92,231,0.35); }
-.btn-primary:active { transform: translateY(0) scale(0.98); }
-.btn-primary:disabled { opacity: 0.3; cursor: default; transform: none; box-shadow: none; }
+.liquid-button:active { transform: scale(0.96); }
+.liquid-button:disabled { opacity: 0.5; pointer-events: none; }
+
+.liquid-glass-rim {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; z-index: 0; transition: all 0.3s;
+  box-shadow: 0 0 8px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.08), inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.45), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.08), inset 0 0 2px 2px rgba(255,255,255,0.06), 0 0 12px rgba(108, 92, 231, 0.4);
+}
+.liquid-button:hover .liquid-glass-rim {
+  box-shadow: 0 0 12px rgba(0,0,0,0.05), 0 4px 10px rgba(0,0,0,0.1), inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.15), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.65), inset 1px 1px 1px -0.5px rgba(255,255,255,0.8), inset -1px -1px 1px -0.5px rgba(255,255,255,0.8), inset 0 0 6px 6px rgba(255,255,255,0.15), inset 0 0 2px 2px rgba(255,255,255,0.1), 0 0 18px rgba(108, 92, 231, 0.6);
+}
+.liquid-glass-backdrop {
+  position: absolute; top: 0; left: 0; isolation: isolate; z-index: -1; width: 100%; height: 100%; border-radius: 12px; overflow: hidden;
+  background: rgba(108, 92, 231, 0.2);
+}
+.liquid-glass-content { position: relative; z-index: 10; display: flex; align-items: center; gap: 8px; pointer-events: none; }
 
 .btn-ghost {
   background: transparent; color: var(--text-3); border: 1px solid var(--border);
