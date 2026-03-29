@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 const GlassFilter = React.memo(function GlassFilter() {
   return (
@@ -42,6 +42,15 @@ const GlassFilter = React.memo(function GlassFilter() {
 });
 
 export const LiquidButton = React.memo(function LiquidButton({ children, className, disabled, ...props }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <button
       className={`liquid-button ${className || ''}`}
@@ -51,7 +60,7 @@ export const LiquidButton = React.memo(function LiquidButton({ children, classNa
       <div className="liquid-glass-rim" />
       <div 
         className="liquid-glass-backdrop" 
-        style={{ backdropFilter: 'url("#container-glass")' }} 
+        style={{ backdropFilter: isMobile ? 'blur(8px)' : 'url("#container-glass")' }} 
       />
       <div className="liquid-glass-content">
         {children}

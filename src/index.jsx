@@ -759,4 +759,12 @@ textarea::placeholder, .answer-input::placeholder { color: var(--text-3); }
   .step-body { padding: 0 16px 16px; }
   .prompt-block { padding: 14px; font-size: 12px; }
 }
+
+@media (max-width: 768px) {
+  /* Prevent compositor crashes on mobile iOS/Chrome */
+  .glow-layer { filter: none !important; mix-blend-mode: normal !important; opacity: 0.5; }
+  .card { animation: none; background-image: none; border-color: rgba(108, 92, 231, 0.4); }
+  .card:hover { animation: none; background-image: none; border-color: rgba(108, 92, 231, 0.8); }
+  .liquid-glass-rim { filter: none !important; mix-blend-mode: normal !important; box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2); }
+}
 `;

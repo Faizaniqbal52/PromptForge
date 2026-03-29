@@ -1,4 +1,4 @@
-import React, { useRef, useId, useEffect } from 'react';
+import React, { useRef, useId, useEffect, useState } from 'react';
 import { animate, useMotionValue } from 'framer-motion';
 
 function mapRange(value, fromLow, fromHigh, toLow, toHigh) {
@@ -25,7 +25,18 @@ export const EtheralShadow = React.memo(function EtheralShadow({
     className
 }) {
     const id = useInstanceId();
-    const animationEnabled = animation && animation.scale > 0;
+    const [isMobile, setIsMobile] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768 || /iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const animationEnabled = animation && animation.scale > 0 && !isMobile;
     const feColorMatrixRef = useRef(null);
     const hueRotateMotionValue = useMotionValue(180);
     const hueRotateAnimation = useRef(null);
