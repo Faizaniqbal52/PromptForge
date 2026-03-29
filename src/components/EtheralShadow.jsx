@@ -16,7 +16,7 @@ const useInstanceId = () => {
     return instanceId;
 };
 
-export function EtheralShadow({
+export const EtheralShadow = React.memo(function EtheralShadow({
     sizing = 'fill',
     color = 'rgba(108, 92, 231, 0.5)', // Using PromptForge accent color
     animation = { scale: 100, speed: 60 },
@@ -152,4 +152,4 @@ export function EtheralShadow({
             )}
         </div>
     );
-}
+});

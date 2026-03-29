@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { EtheralShadow } from './components/EtheralShadow';
 import { LiquidButton } from './components/LiquidButton';
 import { MagneticDock } from './components/MagneticDock';
@@ -15,7 +15,6 @@ Return ONLY JSON: {"phase":"prompts","summary":"summary text","prompts":[{"step"
 
 NEVER return anything outside JSON. No markdown fences.`;
 
-/* ─── Icons ─── */
 const MicIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
@@ -57,7 +56,6 @@ const ChevronIcon = ({ open }) => (
 );
 
 
-/* ─── Main Component ─── */
 export default function PromptForge() {
   const [stage, setStage] = useState(STAGES.INPUT);
   const [requirements, setRequirements] = useState('');
@@ -75,7 +73,6 @@ export default function PromptForge() {
   const finalRef = useRef('');
   const bottomRef = useRef(null);
 
-  // Speech recognition setup
   useEffect(() => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return;
@@ -170,13 +167,11 @@ export default function PromptForge() {
 
   return (
     <>
-      <style>{styles}</style>
+      <GlobalStyles />
       <div className="app">
-        {/* ── Ambient background ── */}
         <EtheralShadow />
         <MagneticDock />
 
-        {/* ── Navigation ── */}
         <nav className="nav">
           <div className="nav-brand">
             <div className="logo-icon"><SparkleIcon /></div>
@@ -184,9 +179,7 @@ export default function PromptForge() {
           </div>
         </nav>
 
-        {/* ── Main Content ── */}
         <main className="main">
-          {/* Hero */}
           <header className="hero">
             <div className="hero-badge">AI Prompt Agent</div>
             <h1 className="hero-title">
@@ -195,7 +188,6 @@ export default function PromptForge() {
             <p className="hero-sub">Describe your idea. I'll ask smart questions, then generate structured, copy-paste-ready AI prompts.</p>
           </header>
 
-          {/* ── Stage: Input ── */}
           {stage === STAGES.INPUT && (
             <div className="card fade-in" id="input-card">
               <div className="card-label">Your Requirements</div>
@@ -231,7 +223,6 @@ export default function PromptForge() {
             </div>
           )}
 
-          {/* ── Stage: Clarifying ── */}
           {stage === STAGES.CLARIFYING && (
             <>
               <div className="card card-muted fade-in">
@@ -348,6 +339,8 @@ export default function PromptForge() {
 /* ═══════════════════════════════════════════════════════
    STYLES
    ═══════════════════════════════════════════════════════ */
+const GlobalStyles = memo(() => <style>{styles}</style>);
+
 const styles = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
 

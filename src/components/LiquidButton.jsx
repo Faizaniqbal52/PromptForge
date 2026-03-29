@@ -1,6 +1,6 @@
 import React from 'react';
 
-function GlassFilter() {
+const GlassFilter = React.memo(function GlassFilter() {
   return (
     <svg className="hidden" style={{ position: 'absolute', width: 0, height: 0 }} aria-hidden="true">
       <defs>
@@ -39,9 +39,9 @@ function GlassFilter() {
       </defs>
     </svg>
   );
-}
+});
 
-export function LiquidButton({ children, className, disabled, ...props }) {
+export const LiquidButton = React.memo(function LiquidButton({ children, className, disabled, ...props }) {
   return (
     <button
       className={`liquid-button ${className || ''}`}
@@ -59,4 +59,4 @@ export function LiquidButton({ children, className, disabled, ...props }) {
       <GlassFilter />
     </button>
   );
-}
+});

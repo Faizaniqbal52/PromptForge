@@ -84,7 +84,7 @@ function DockIcon({ icon, href }) {
 }
 
 // main dock
-export function MagneticDock() {
+export const MagneticDock = React.memo(function MagneticDock() {
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
   const onMouseMove = e => {
@@ -130,4 +130,4 @@ export function MagneticDock() {
       </div>
     </MouseContext.Provider>
   );
-}
+});
