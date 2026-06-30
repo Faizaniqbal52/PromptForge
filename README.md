@@ -2,7 +2,7 @@
 
 > A multi-model LLM orchestration agent built around the observation that most LLM failures originate not in the model but in the prompt — and that a short structured clarification loop before generation reduces output variance and ambiguity by more than most prompt-engineering tricks combined.
 
-[![Live](https://img.shields.io/badge/Live-Coming_Soon-F97316)](#)
+[![Live](https://img.shields.io/badge/Live-Coming_Soon-F97316)](https://prompt-forge-gules.vercel.app/)
 [![Stack](https://img.shields.io/badge/Stack-React_·_Vite_·_Groq_·_Anthropic-3178C6)](#)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
